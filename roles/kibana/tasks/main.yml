@@ -1,0 +1,13 @@
+---
+# tasks file for kibana
+- name: Install Kibana
+  yum:
+    name: kibana
+    state: present
+
+- name: Start kibana
+  systemd:
+    name: kibana
+    enabled: yes
+    state: started
+    daemon_reexec: yes

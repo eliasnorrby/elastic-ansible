@@ -1,0 +1,15 @@
+# Hosts used in the Blasphemy ansible/vagrant experimentation project
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null
+  User deploy
+  IdentityFile ~/.ssh/elastic-ansible-config/elastic-ansible
+
+Host node01
+  HostName 192.168.88.201
+
+Host node02
+  HostName 192.168.88.202
+
+Host node03
+  HostName 192.168.88.203

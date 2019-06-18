@@ -1,0 +1,82 @@
+---
+# tasks file for filebeat
+- name: Install Filebeat
+  yum:
+    name: filebeat
+    state: present
+
+- name: Disable Elasticsearch output
+  lineinfile:
+    path: /etc/filebeat/filebeat.yml
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - output:
+      regexp: "^#?output.elasticsearch:"
+      line: "#output.elasticsearch:"
+    - hosts:
+      regexp: '^  #?hosts: \["localhost:{{ elasticsearch_port }}"\]'
+      line: '  #hosts: ["localhost:{{ elasticsearch_port }}"]'
+
+- name: Enable Logstash output
+  lineinfile:
+    path: /etc/filebeat/filebeat.yml
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - output:
+      regexp: "^#?output.logstash:"
+      line: "output.logstash:"
+    - hosts:
+      regexp: '^  #?hosts: \["localhost:{{ logstash_port }}"\]'
+      line: '  hosts: ["localhost:{{ logstash_port }}"]'
+
+- name: Enable modules
+  command: mv {{ modules_dir }}{{ item }}.yml.disabled {{ modules_dir }}{{ item }}.yml
+  args:
+    removes: "{{ modules_dir }}{{ item }}.yml.disabled"
+    creates: "{{ modules_dir }}{{ item }}.yml"
+  vars:
+    - modules_dir: /etc/filebeat/modules.d/
+  with_items:
+    - system
+    - nginx
+    - logstash
+  notify: restart-filebeat
+  register: modules
+
+# - debug:
+#     var: modules
+
+- name: Load index template
+  command: |
+    filebeat setup --template -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=["localhost:{{ elasticsearch_port }}"]'
+  tags:
+    - never
+    - bootstrap
+
+  # args:
+  #   creates: /etc/filebeat/index_template_load.done
+  # register: index_template
+# - debug:
+#     var: index_template
+
+- name: Import sample dashboards
+  command: |
+    filebeat setup -e -E output.logstash.enabled=false -E output.elasticsearch.hosts=['localhost:{{ elasticsearch_port }}'] -E setup.kibana.host=localhost:{{ kibana_internal_port }}
+  tags:
+    - never
+    - bootstrap
+
+  # args:
+  #   creates: /etc/filebeat/sample_dashboard_import.done
+  # register: sample_dashboard
+# - debug:
+#     var: sample_dashboard
+
+- name: Start Filebeat
+  systemd:
+    name: filebeat
+    enabled: yes
+    state: started
+    daemon_reexec: yes

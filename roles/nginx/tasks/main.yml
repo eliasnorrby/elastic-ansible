@@ -1,0 +1,29 @@
+---
+# tasks file for nginx
+- name: Add the EPEL repository
+  yum:
+    name: epel-release
+    state: present
+
+- name: Install nginx
+  yum:
+    name: nginx
+    state: present
+
+- name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+
+- name: Import nginx configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/nginx.conf
+  notify: restart-nginx
+
+- name: Start nginx
+  systemd:
+    name: nginx
+    enabled: yes
+    state: started

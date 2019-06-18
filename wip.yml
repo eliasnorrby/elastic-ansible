@@ -1,0 +1,40 @@
+---
+- hosts: nodes
+  become: true
+  tasks:
+    - name: Install Java 8 JRE
+      yum:
+        name: java-1.8.0-openjdk
+        state: present
+      tags: packages
+
+    - name: Install packages for managing selinux
+      yum:
+        name:
+          - libselinux-python
+          - libsemanage-python
+          - policycoreutils-python
+        state: present
+      tags: packages
+
+    - import_role:
+        name: nginx
+      vars:
+        - stack_ip: "{{ ansible_default_ipv4.address }}"
+      tags: nginx
+
+    - import_role:
+        name: elasticsearch
+      tags: elasticsearch
+
+    - import_role:
+        name: kibana
+      tags: kibana
+
+    - import_role:
+        name: logstash
+      tags: logstash
+
+    - import_role:
+        name: filebeat
+      tags: filebeat

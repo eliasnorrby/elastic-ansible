@@ -1,0 +1,8 @@
+---
+# handlers file for user-initialization
+- name: restart sshd
+  remote_user: "{{ deploy_user_name }}"
+  become: true
+  service:
+    name: sshd
+    state: restarted

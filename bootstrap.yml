@@ -1,0 +1,19 @@
+---
+- name: "Perform one-time setup using root user. Activate with 'never' tag"
+  hosts: nodes
+  remote_user: vagrant
+  become: true
+  # become_user: root
+  tags: ["never", "initial_bootstrap"]
+  tasks:
+    - import_role:
+        name: user-initialization
+      vars:
+        users:
+          - user_name: "{{ non_root_user_name }}"
+            user_pass: "{{ non_root_user_pass_hashed }}"
+            user_ssh_key: "{{ non_root_ssh_public_key_file }}"
+          - user_name: "{{ deploy_user_name }}"
+            user_pass: "{{ deploy_user_pass }}"
+            user_ssh_key: "{{ deploy_user_ssh_public_key_file }}"
+

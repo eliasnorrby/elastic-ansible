@@ -1,0 +1,47 @@
+---
+# tasks file for user-initialization
+- name: "Create a secondary, non-root user"
+  user:
+    name: "{{ non_root_user_name }}"
+    password: "{{ non_root_user_pass_hashed }}"
+    shell: /bin/bash
+
+- name: "Add remote authorized key to allow future passwordless logins"
+  authorized_key:
+    user: "{{ non_root_user_name }}"
+    key: "{{ lookup('file', non_root_ssh_public_key_file) }}"
+
+- name: "Add normal user to sudoers"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "{{ non_root_user_name }} ALL"
+    line: "{{ non_root_user_name }} ALL=(ALL) ALL"
+    validate: "visudo -cf %s"
+
+- name: "Create a deploy user for ansible"
+  user:
+    name: "{{ deploy_user_name }}"
+    password: "{{ deploy_user_pass_hashed }}"
+    shell: /bin/bash
+
+- name: "Add authorized key to allow future passwordless logins"
+  authorized_key:
+    user: "{{ deploy_user_name }}"
+    key: "{{ lookup('file', deploy_user_ssh_public_key_file) }}"
+
+- name: "Enable passwordless sudo for deploy user"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: "{{ deploy_user_name }} ALL"
+    line: "{{ deploy_user_name }} ALL=(ALL) NOPASSWD:ALL"
+    validate: "visudo -cf %s"
+
+- name: "Restrict root SSH logins"
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: "^#? ?PermitRootLogin"
+    line: "PermitRootLogin no"
+  notify: restart sshd

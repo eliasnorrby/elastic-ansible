@@ -1,0 +1,22 @@
+---
+non_root_user_name: "elinor"
+# non_root_user_pass: "{{ vault_non_root_user_pass }}"
+non_root_user_pass_hashed: "{{ vault_non_root_user_pass_hashed }}"
+non_root_ssh_public_key_file: "/Users/elias.norrby/.ssh/id_rsa.pub"
+
+deploy_user_name: "deploy"
+# deploy_user_pass: "{{ vault_deploy_user_pass }}"
+deploy_user_pass_hashed: "{{ vault_deploy_user_pass_hashed }}"
+deploy_user_ssh_public_key_file: "/Users/elias.norrby/.ssh/elastic-ansible-config/elastic-ansible.pub"
+
+hostname_base: "elastic"
+
+stack_host_name: localhost
+
+kibana_host_ip: "192.168.88.201"
+kibana_internal_port: "5601 "
+kibana_external_port: "8008"
+
+elasticsearch_port: "9200"
+
+logstash_port: "5044"

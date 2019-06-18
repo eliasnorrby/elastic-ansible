@@ -1,0 +1,14 @@
+server {
+  listen {{ kibana_external_port }};
+
+  # server_name {{ stack_host_name }} {{ stack_ip }} {{ kibana_host_ip }};
+
+  location / {
+    proxy_pass http://localhost:{{ kibana_internal_port }};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+  }
+}

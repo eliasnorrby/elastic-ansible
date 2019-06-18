@@ -1,0 +1,18 @@
+---
+# tasks file for logstash
+- name: Install Logstash
+  yum:
+    name: logstash
+    state: present
+
+- name: Copy configuration files
+  copy:
+    src: conf.d/
+    dest: /etc/logstash/conf.d/
+
+- name: Start Logstash
+  systemd:
+    name: logstash
+    enabled: yes
+    state: started
+    daemon_reexec: yes
